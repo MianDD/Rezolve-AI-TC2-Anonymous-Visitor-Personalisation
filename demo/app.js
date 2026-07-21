@@ -7,6 +7,10 @@ const elements = {
   metricCategory: document.getElementById("metric-category"),
   metricItem: document.getElementById("metric-item"),
   metricPurchase: document.getElementById("metric-purchase"),
+  datasetSessions: document.getElementById("dataset-sessions"),
+  datasetDetail: document.getElementById("dataset-detail"),
+  categoryCoverage: document.getElementById("category-coverage"),
+  baselineChart: document.getElementById("baseline-chart"),
   sessionCount: document.getElementById("session-count"),
   sessionButtons: document.getElementById("session-buttons"),
   selectedSession: document.getElementById("selected-session"),
@@ -14,12 +18,15 @@ const elements = {
   decisionIndex: document.getElementById("decision-index"),
   conversionStage: document.getElementById("conversion-stage"),
   intentProxy: document.getElementById("intent-proxy"),
+  decisionSignals: document.getElementById("decision-signals"),
   prefixEvents: document.getElementById("prefix-events"),
+  strategyNote: document.getElementById("strategy-note"),
   moduleGrid: document.getElementById("module-grid"),
   nextEvent: document.getElementById("next-event"),
   nextItem: document.getElementById("next-item"),
   nextCategory: document.getElementById("next-category"),
   strategyMatch: document.getElementById("strategy-match"),
+  futureEvents: document.getElementById("future-events"),
   strategyButtons: Array.from(document.querySelectorAll("[data-strategy]")),
 };
 
@@ -41,16 +48,16 @@ function titleCase(value) {
   return label(value).replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function compactNumber(value) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+
 function itemLabel(value) {
   return value === null || value === undefined ? "Unknown item" : `Item ${value}`;
 }
 
 function categoryLabel(value) {
   return value === null || value === undefined ? "Unknown category" : `Category ${value}`;
-}
-
-function moduleLabel(value) {
-  return titleCase(value);
 }
 
 function eventBadgeClass(eventType) {
@@ -69,6 +76,36 @@ function renderMetrics() {
   elements.metricPurchase.textContent = pct(demoData.metrics.purchase_early_cart_test_f1);
 }
 
+function renderDatasetOverview() {
+  const summary = demoData.dataset_summary;
+  elements.datasetSessions.textContent = `${compactNumber(summary.sessions)} sessions`;
+  elements.datasetDetail.textContent = `${compactNumber(summary.events)} events, ${compactNumber(summary.labels)} labels, ${compactNumber(summary.homepage_impressions)} simulated impressions.`;
+  elements.categoryCoverage.textContent = pct(summary.decision_category_coverage);
+}
+
+function renderBaselineChart() {
+  const cards = demoData.baseline_cards || [];
+  const maxValue = Math.max(...cards.map((card) => card.value || 0), 1);
+  elements.baselineChart.innerHTML = "";
+  cards.forEach((card) => {
+    const row = document.createElement("article");
+    row.className = "baseline-row";
+    const width = `${((card.value || 0) / maxValue) * 100}%`;
+    row.innerHTML = `
+      <div class="baseline-label">
+        <strong>${card.label}</strong>
+        <span>${card.model} - ${card.unit}</span>
+      </div>
+      <div class="bar-wrap" aria-hidden="true">
+        <div class="bar-fill" style="width: ${width}"></div>
+      </div>
+      <strong class="baseline-value">${pct(card.value)}</strong>
+    `;
+    row.setAttribute("aria-label", `${card.label}: ${pct(card.value)} using ${card.model}`);
+    elements.baselineChart.appendChild(row);
+  });
+}
+
 function renderSessionButtons() {
   elements.sessionCount.textContent = `${demoData.sessions.length} shown`;
   elements.sessionButtons.innerHTML = "";
@@ -78,13 +115,32 @@ function renderSessionButtons() {
     button.className = `session-button${index === selectedSessionIndex ? " is-active" : ""}`;
     button.innerHTML = `
       ${session.session_id}
-      <span>${titleCase(session.intent_proxy)} · ${session.split}</span>
+      <span>${titleCase(session.intent_proxy)} - ${session.split}</span>
     `;
     button.addEventListener("click", () => {
       selectedSessionIndex = index;
       render();
     });
     elements.sessionButtons.appendChild(button);
+  });
+}
+
+function renderDecisionSignals(session) {
+  const signals = session.decision_signals;
+  const items = [
+    ["Prefix events", signals.prefix_event_count],
+    ["Views", signals.prefix_view_count],
+    ["Early carts", signals.prefix_add_to_cart_count],
+    ["Unique items", signals.prefix_unique_items],
+    ["Last category", categoryLabel(signals.last_category_id)],
+    ["Frequent category", categoryLabel(signals.most_frequent_category_id)],
+  ];
+  elements.decisionSignals.innerHTML = "";
+  items.forEach(([name, value]) => {
+    const chip = document.createElement("div");
+    chip.className = "signal-chip";
+    chip.innerHTML = `<span>${name}</span><strong>${label(value)}</strong>`;
+    elements.decisionSignals.appendChild(chip);
   });
 }
 
@@ -107,11 +163,24 @@ function renderPrefix(session) {
   });
 }
 
+function strategyText(session) {
+  const signals = session.decision_signals;
+  if (selectedStrategy === "control") {
+    return "Control uses train-period global popularity only. It does not react to this visitor's early-session behaviour.";
+  }
+  const category = categoryLabel(signals.most_frequent_category_id ?? signals.last_category_id);
+  if (signals.prefix_add_to_cart_count > 0) {
+    return `Rule based uses early cart activity plus current category context (${category}) before choosing modules.`;
+  }
+  return `Rule based uses the most recent or most frequent early-session category (${category}) before choosing modules.`;
+}
+
 function renderModules(session) {
   const modules = session.impressions.filter(
     (impression) => impression.experiment_group === selectedStrategy
   );
   elements.moduleGrid.innerHTML = "";
+  elements.strategyNote.textContent = strategyText(session);
   modules.forEach((module) => {
     const card = document.createElement("article");
     card.className = `module-card${module.simulated_click ? " is-match" : ""}`;
@@ -123,7 +192,7 @@ function renderModules(session) {
             ${module.simulated_click ? "Matched" : "Shown"}
           </span>
         </div>
-        <p class="module-type">${moduleLabel(module.module_type)}</p>
+        <p class="module-type">${titleCase(module.module_type)}</p>
       </div>
       <div class="module-meta">
         <span>${itemLabel(module.content_item_id)}</span>
@@ -139,9 +208,11 @@ function renderModules(session) {
 
 function renderOutcome(session) {
   const next = session.next_event;
+  const summary = session.future_summary;
   elements.nextEvent.textContent = titleCase(next.event_type);
   elements.nextItem.textContent = itemLabel(next.item_id);
   elements.nextCategory.textContent = categoryLabel(next.category_id);
+  elements.futureEvents.textContent = `${summary.events_after_decision} total, ${summary.add_to_cart_events_after_decision} cart, ${summary.transactions_after_decision} purchase`;
 }
 
 function renderSelectedSession() {
@@ -151,6 +222,7 @@ function renderSelectedSession() {
   elements.decisionIndex.textContent = `After ${session.decision_event_index} events`;
   elements.conversionStage.textContent = titleCase(session.final_conversion_stage);
   elements.intentProxy.textContent = titleCase(session.intent_proxy);
+  renderDecisionSignals(session);
   renderPrefix(session);
   renderModules(session);
   renderOutcome(session);
@@ -166,6 +238,8 @@ function renderStrategyButtons() {
 
 function render() {
   renderMetrics();
+  renderDatasetOverview();
+  renderBaselineChart();
   renderSessionButtons();
   renderStrategyButtons();
   renderSelectedSession();

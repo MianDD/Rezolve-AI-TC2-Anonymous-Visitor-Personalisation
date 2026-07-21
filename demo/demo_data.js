@@ -1,6 +1,39 @@
 window.TC2_DEMO_DATA = {
   "generated_from": "data\\processed",
   "session_count": 12,
+  "dataset_summary": {
+    "sessions": 50000,
+    "events": 175770,
+    "labels": 12730,
+    "homepage_impressions": 127300,
+    "unique_items": 49986,
+    "unique_categories": 961,
+    "event_category_coverage": 0.7882403140467656,
+    "decision_category_coverage": 0.8871956009426551
+  },
+  "split_summary": [
+    {
+      "split": "test",
+      "sessions": 7500,
+      "start": "2015-08-25T20:27:58.378000",
+      "end": "2015-09-18T02:54:37.114000",
+      "conversion_rate": 0.0364
+    },
+    {
+      "split": "train",
+      "sessions": 35000,
+      "start": "2015-05-03T03:00:04.384000",
+      "end": "2015-08-02T04:32:02.401000",
+      "conversion_rate": 0.03428571428571429
+    },
+    {
+      "split": "validation",
+      "sessions": 7500,
+      "start": "2015-08-02T04:33:59.806000",
+      "end": "2015-08-25T20:24:44.482000",
+      "conversion_rate": 0.0352
+    }
+  ],
   "metrics": {
     "next_category_recent_rule_test_accuracy": 0.7941176470588235,
     "next_item_recent_rule_test_accuracy": 0.2431544359255202,
@@ -9,6 +42,50 @@ window.TC2_DEMO_DATA = {
     "homepage_control_test_match_rate": 0.0064622124863088,
     "homepage_rule_based_test_match_rate": 0.7090909090909091
   },
+  "baseline_cards": [
+    {
+      "label": "Next category",
+      "model": "Recent category rule",
+      "value": 0.7941176470588235,
+      "unit": "accuracy",
+      "detail": "Uses only the most recent category available before the decision."
+    },
+    {
+      "label": "Next item",
+      "model": "Recent item rule",
+      "value": 0.2431544359255202,
+      "unit": "accuracy",
+      "detail": "Predicts that the visitor keeps engaging with the latest item."
+    },
+    {
+      "label": "Add to cart",
+      "model": "Early cart rule",
+      "value": 0.4288354898336414,
+      "unit": "F1",
+      "detail": "Flags sessions with cart activity before the decision point."
+    },
+    {
+      "label": "Purchase",
+      "model": "Early cart rule",
+      "value": 0.4532710280373832,
+      "unit": "F1",
+      "detail": "Uses early cart activity as a simple purchase-intent signal."
+    },
+    {
+      "label": "Homepage control",
+      "model": "Train popularity",
+      "value": 0.0064622124863088,
+      "unit": "synthetic match",
+      "detail": "Training-period global popularity only."
+    },
+    {
+      "label": "Homepage rule based",
+      "model": "Early-session category",
+      "value": 0.7090909090909091,
+      "unit": "synthetic match",
+      "detail": "Uses prefix category/cart signals before the decision."
+    }
+  ],
   "sessions": [
     {
       "session_id": "s_00327658",
@@ -57,6 +134,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 26,
         "add_to_cart_events_after_decision": 9,
         "transactions_after_decision": 3
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 2,
+        "last_item_id": 44986,
+        "last_category_id": 212.0,
+        "most_frequent_category_id": 332.0,
+        "seconds_from_session_start": 257.691
       },
       "impressions": [
         {
@@ -209,6 +297,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 2,
         "transactions_after_decision": 1
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 1,
+        "prefix_add_to_cart_count": 2,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 1,
+        "last_item_id": 55364,
+        "last_category_id": 1578.0,
+        "most_frequent_category_id": 1578.0,
+        "seconds_from_session_start": 34.485
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -359,6 +458,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 15,
         "add_to_cart_events_after_decision": 3,
         "transactions_after_decision": 3
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 1,
+        "prefix_add_to_cart_count": 2,
+        "prefix_unique_items": 3,
+        "prefix_unique_categories": 3,
+        "last_item_id": 254656,
+        "last_category_id": 34.0,
+        "most_frequent_category_id": 1645.0,
+        "seconds_from_session_start": 148.678
       },
       "impressions": [
         {
@@ -511,6 +621,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 2,
+        "last_item_id": 380212,
+        "last_category_id": 973.0,
+        "most_frequent_category_id": 973.0,
+        "seconds_from_session_start": 179.356
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -661,6 +782,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 6,
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 2,
+        "last_item_id": 148529,
+        "last_category_id": 176.0,
+        "most_frequent_category_id": 1679.0,
+        "seconds_from_session_start": 480.385
       },
       "impressions": [
         {
@@ -813,6 +945,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 1,
+        "prefix_unique_categories": 1,
+        "last_item_id": 107352,
+        "last_category_id": 1530.0,
+        "most_frequent_category_id": 1530.0,
+        "seconds_from_session_start": 221.359
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -963,6 +1106,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 25,
         "add_to_cart_events_after_decision": 2,
         "transactions_after_decision": 1
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 2,
+        "last_item_id": 277328,
+        "last_category_id": 1051.0,
+        "most_frequent_category_id": 628.0,
+        "seconds_from_session_start": 726.5
       },
       "impressions": [
         {
@@ -1115,6 +1269,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 2,
         "transactions_after_decision": 2
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 1,
+        "prefix_unique_categories": 1,
+        "last_item_id": 33993,
+        "last_category_id": 1179.0,
+        "most_frequent_category_id": 1179.0,
+        "seconds_from_session_start": 552.77
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -1265,6 +1430,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 4,
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 1,
+        "prefix_unique_categories": 1,
+        "last_item_id": 217584,
+        "last_category_id": 1578.0,
+        "most_frequent_category_id": 1578.0,
+        "seconds_from_session_start": 246.282
       },
       "impressions": [
         {
@@ -1417,6 +1593,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 1,
+        "prefix_unique_categories": 1,
+        "last_item_id": 386947,
+        "last_category_id": 959.0,
+        "most_frequent_category_id": 959.0,
+        "seconds_from_session_start": 1643.606
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -1568,6 +1755,17 @@ window.TC2_DEMO_DATA = {
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
       },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 2,
+        "prefix_unique_categories": 1,
+        "last_item_id": 209050,
+        "last_category_id": 618.0,
+        "most_frequent_category_id": 618.0,
+        "seconds_from_session_start": 172.261
+      },
       "impressions": [
         {
           "experiment_group": "control",
@@ -1718,6 +1916,17 @@ window.TC2_DEMO_DATA = {
         "events_after_decision": 3,
         "add_to_cart_events_after_decision": 1,
         "transactions_after_decision": 2
+      },
+      "decision_signals": {
+        "prefix_event_count": 3,
+        "prefix_view_count": 2,
+        "prefix_add_to_cart_count": 1,
+        "prefix_unique_items": 1,
+        "prefix_unique_categories": 1,
+        "last_item_id": 182738,
+        "last_category_id": 394.0,
+        "most_frequent_category_id": 394.0,
+        "seconds_from_session_start": 84.634
       },
       "impressions": [
         {

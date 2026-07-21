@@ -6,7 +6,7 @@
 - Source type in event tables: retailrocket
 - Retailrocket files expected in: `data\raw\retailrocket`
 - Missing metadata files during this run: none
-- Processing date: 2026-07-21T09:26:06.669179+00:00
+- Processing date: 2026-07-21T10:06:19.110334+00:00
 
 Retailrocket is a public e-commerce behavioural dataset distributed through Kaggle. Follow Kaggle's dataset page for attribution and licence requirements before using the full dataset in shared or commercial work.
 

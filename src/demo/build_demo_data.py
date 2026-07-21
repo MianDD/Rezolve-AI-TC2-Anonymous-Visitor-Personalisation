@@ -100,6 +100,7 @@ def build_demo_payload(
     features = _load_required_parquet(data_path, "decision_features")
     homepage = _load_required_parquet(data_path, "homepage_impressions")
     splits = _load_required_parquet(data_path, "splits")
+    sessions = _load_required_parquet(data_path, "sessions")
 
     selected_sessions = choose_demo_sessions(labels, features, splits, max_sessions)
     examples = labels.merge(
@@ -171,6 +172,25 @@ def build_demo_payload(
                         future_events["event_type"].eq("transaction").sum()
                     ),
                 },
+                "decision_signals": {
+                    "prefix_event_count": _value(example["prefix_event_count"]),
+                    "prefix_view_count": _value(example["prefix_view_count"]),
+                    "prefix_add_to_cart_count": _value(
+                        example["prefix_add_to_cart_count"]
+                    ),
+                    "prefix_unique_items": _value(example["prefix_unique_items"]),
+                    "prefix_unique_categories": _value(
+                        example["prefix_unique_categories"]
+                    ),
+                    "last_item_id": _value(example["last_item_id"]),
+                    "last_category_id": _value(example["last_category_id"]),
+                    "most_frequent_category_id": _value(
+                        example["most_frequent_category_id"]
+                    ),
+                    "seconds_from_session_start": _value(
+                        example["seconds_from_session_start"]
+                    ),
+                },
                 "impressions": _records(
                     impressions[
                         [
@@ -239,10 +259,37 @@ def build_demo_payload(
         ),
     }
 
+    dataset_summary = {
+        "sessions": int(len(sessions)),
+        "events": int(len(events)),
+        "labels": int(len(labels)),
+        "homepage_impressions": int(len(homepage)),
+        "unique_items": int(events["item_id"].nunique()),
+        "unique_categories": int(events["category_id"].nunique()),
+        "event_category_coverage": float(events["category_id"].notna().mean()),
+        "decision_category_coverage": float(
+            features["last_category_id"].notna().mean()
+        ),
+    }
+    split_summary = (
+        sessions.merge(splits, on="session_id", how="inner")
+        .groupby("split")
+        .agg(
+            sessions=("session_id", "count"),
+            start=("session_start", "min"),
+            end=("session_start", "max"),
+            conversion_rate=("converted", "mean"),
+        )
+        .reset_index()
+    )
+
     return {
         "generated_from": str(data_path),
         "session_count": len(sessions_payload),
+        "dataset_summary": dataset_summary,
+        "split_summary": _records(split_summary),
         "metrics": metrics,
+        "baseline_cards": _baseline_cards(metrics),
         "sessions": sessions_payload,
         "limitations": [
             "Homepage impressions are simulated.",
@@ -251,6 +298,53 @@ def build_demo_payload(
             "Intent labels are behavioural proxies, not human-labelled intent.",
         ],
     }
+
+
+def _baseline_cards(metrics: dict[str, float | None]) -> list[dict[str, Any]]:
+    return [
+        {
+            "label": "Next category",
+            "model": "Recent category rule",
+            "value": metrics["next_category_recent_rule_test_accuracy"],
+            "unit": "accuracy",
+            "detail": "Uses only the most recent category available before the decision.",
+        },
+        {
+            "label": "Next item",
+            "model": "Recent item rule",
+            "value": metrics["next_item_recent_rule_test_accuracy"],
+            "unit": "accuracy",
+            "detail": "Predicts that the visitor keeps engaging with the latest item.",
+        },
+        {
+            "label": "Add to cart",
+            "model": "Early cart rule",
+            "value": metrics["add_to_cart_early_cart_test_f1"],
+            "unit": "F1",
+            "detail": "Flags sessions with cart activity before the decision point.",
+        },
+        {
+            "label": "Purchase",
+            "model": "Early cart rule",
+            "value": metrics["purchase_early_cart_test_f1"],
+            "unit": "F1",
+            "detail": "Uses early cart activity as a simple purchase-intent signal.",
+        },
+        {
+            "label": "Homepage control",
+            "model": "Train popularity",
+            "value": metrics["homepage_control_test_match_rate"],
+            "unit": "synthetic match",
+            "detail": "Training-period global popularity only.",
+        },
+        {
+            "label": "Homepage rule based",
+            "model": "Early-session category",
+            "value": metrics["homepage_rule_based_test_match_rate"],
+            "unit": "synthetic match",
+            "detail": "Uses prefix category/cart signals before the decision.",
+        },
+    ]
 
 
 def _metric(

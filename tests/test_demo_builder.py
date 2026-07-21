@@ -69,19 +69,30 @@ def test_demo_payload_uses_processed_outputs(tmp_path: Path) -> None:
         }
     )
     splits = pd.DataFrame({"session_id": ["s1"], "split": ["test"]})
+    sessions = pd.DataFrame(
+        {
+            "session_id": ["s1"],
+            "session_start": [pd.Timestamp("2024-01-01 00:00:00")],
+            "converted": [True],
+        }
+    )
 
     events.to_parquet(data_dir / "events.parquet", index=False)
     labels.to_parquet(data_dir / "labels.parquet", index=False)
     features.to_parquet(data_dir / "decision_features.parquet", index=False)
     homepage.to_parquet(data_dir / "homepage_impressions.parquet", index=False)
     splits.to_parquet(data_dir / "splits.parquet", index=False)
+    sessions.to_parquet(data_dir / "sessions.parquet", index=False)
 
     payload = build_demo_payload(data_dir=data_dir, baseline_dir=baseline_dir, max_sessions=1)
 
     assert payload["session_count"] == 1
+    assert payload["dataset_summary"]["sessions"] == 1
+    assert payload["baseline_cards"][0]["label"] == "Next category"
     assert payload["sessions"][0]["session_id"] == "s1"
     assert payload["sessions"][0]["prefix"][0]["item_id"] == 10
     assert payload["sessions"][0]["next_event"]["event_type"] == "transaction"
+    assert payload["sessions"][0]["decision_signals"]["prefix_event_count"] == 3
     assert payload["sessions"][0]["impressions"][1]["is_synthetic"] is True
 
     output = write_demo_data(payload, tmp_path / "demo_data.js")

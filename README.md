@@ -116,7 +116,9 @@ Build the static demo dataset from the prepared Parquet files and baseline table
   --max-sessions 12
 ```
 
-Open `demo/index.html` in a browser. The demo compares control and rule-based homepage modules for representative anonymous sessions. Displayed homepage clicks are synthetic match signals only; they are not observed CTR.
+Open `demo/index.html` in a browser. The demo compares control and rule-based homepage modules for representative anonymous sessions, shows decision-time signals, and links the displayed modules back to leakage-safe processed data. Displayed homepage clicks are synthetic match signals only; they are not observed CTR.
+
+The current demo data was generated from a deterministic 50,000-session Retailrocket development sample. See `reports/final_project_report.md` for the project-level delivery summary.
 
 ## Outputs
 
@@ -224,12 +226,24 @@ src/
 `-- synthetic/
     |-- pure_random_dataset.py
     `-- reasonable_random_dataset.py
+
+reports/
+|-- dataset_summary.md
+|-- baseline_evaluation.md
+`-- final_project_report.md
+
+demo/
+|-- index.html
+|-- styles.css
+|-- app.js
+`-- demo_data.js
 ```
 
 ## Next Development Steps
 
 - Add first baseline notebooks over `decision_features.parquet` and `labels.parquet`.
-- Add category-aware popularity and recent-category baselines.
-- Add a simple prototype homepage renderer using `homepage_impressions.parquet`.
+- Run the same commands on the full Retailrocket dataset for a larger benchmark.
+- Add session-similarity and category-aware sequence baselines.
+- Add simple scikit-learn classifiers for add-to-cart and purchase prediction.
 - Add stronger metadata handling for full Retailrocket item property history.
 - Add later contextual bandit experiments only after the dataset contract is stable.

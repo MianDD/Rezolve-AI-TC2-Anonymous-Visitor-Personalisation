@@ -12,6 +12,7 @@
       <div>
         <p class="eyebrow">TC2 Anonymous Visitor Personalisation</p>
         <h1>Homepage module decisions from early-session behaviour</h1>
+        <p class="hero-copy">A reproducible Retailrocket pipeline creates anonymous sessions, decision-time features, labels, train/test baselines, and a synthetic homepage-impression layer for prototype demonstrations.</p>
       </div>
       <div class="summary" aria-label="Baseline summary">
         <div>
@@ -28,6 +29,32 @@
         </div>
       </div>
     </header>
+
+    <section class="overview-grid" aria-label="Dataset and baseline overview">
+      <article class="overview-card">
+        <span>Processed sample</span>
+        <strong id="dataset-sessions">-</strong>
+        <p id="dataset-detail">-</p>
+      </article>
+      <article class="overview-card">
+        <span>Chronological split</span>
+        <strong>70 / 15 / 15</strong>
+        <p>Popularity and rules are fitted on train only.</p>
+      </article>
+      <article class="overview-card">
+        <span>Category coverage</span>
+        <strong id="category-coverage">-</strong>
+        <p>Decision-time category availability after leakage-safe joining.</p>
+      </article>
+    </section>
+
+    <section class="baseline-section" aria-label="Baseline result comparison">
+      <div class="section-heading">
+        <h2>Baseline Signals</h2>
+        <span>50k-session sample</span>
+      </div>
+      <div id="baseline-chart" class="baseline-chart"></div>
+    </section>
 
     <section class="workspace" aria-label="Demo workspace">
       <aside class="session-list" aria-label="Anonymous sessions">
@@ -57,6 +84,7 @@
             <strong id="intent-proxy">-</strong>
           </div>
         </div>
+        <div class="signal-grid" id="decision-signals" aria-label="Decision-time signals"></div>
         <ol id="prefix-events" class="event-timeline" aria-label="Early session events"></ol>
       </section>
 
@@ -68,6 +96,7 @@
             <button type="button" class="toggle-button" data-strategy="rule_based">Rule based</button>
           </div>
         </div>
+        <div class="strategy-note" id="strategy-note"></div>
         <div id="module-grid" class="module-grid"></div>
       </section>
     </section>
@@ -88,6 +117,10 @@
       <div>
         <span>Synthetic match</span>
         <strong id="strategy-match">-</strong>
+      </div>
+      <div>
+        <span>Later events</span>
+        <strong id="future-events">-</strong>
       </div>
     </section>
 
