@@ -106,6 +106,10 @@ This evaluates global popularity, category popularity, recent-item/category rule
 
 ## Interactive Demo
 
+Live demo:
+
+https://tc2-anonymous-demo.zongmian.chatgpt.site
+
 Build the static demo dataset from the prepared Parquet files and baseline tables:
 
 ```bash

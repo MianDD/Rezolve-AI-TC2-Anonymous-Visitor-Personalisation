@@ -66,6 +66,10 @@ The unit test suite also passes against deterministic fixtures, so development d
 
 ## Demo
 
+Live demo:
+
+https://tc2-anonymous-demo.zongmian.chatgpt.site
+
 The static demo in `demo/index.html` shows:
 
 - project-level data and baseline metrics;
