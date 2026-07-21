@@ -6,7 +6,7 @@
 - Source type in event tables: retailrocket
 - Retailrocket files expected in: `data\raw\retailrocket`
 - Missing metadata files during this run: none
-- Processing date: 2026-07-21T09:07:04.412966+00:00
+- Processing date: 2026-07-21T09:26:06.669179+00:00
 
 Retailrocket is a public e-commerce behavioural dataset distributed through Kaggle. Follow Kaggle's dataset page for attribution and licence requirements before using the full dataset in shared or commercial work.
 
@@ -23,7 +23,7 @@ Retailrocket is a public e-commerce behavioural dataset distributed through Kagg
   "decision_event_index": 3,
   "seed": 42,
   "max_events": null,
-  "max_sessions": 5000,
+  "max_sessions": 50000,
   "sample_strategy": "evenly_spaced"
 }
 ```
@@ -31,17 +31,17 @@ Retailrocket is a public e-commerce behavioural dataset distributed through Kagg
 ## Volumes
 
 - Raw event rows loaded: 2756101
-- Retained event rows: 18584
-- Retained sessions: 5000
-- Unique items: 10278
-- Unique categories: 692
-- Synthetic homepage impressions: 12830
+- Retained event rows: 175770
+- Retained sessions: 50000
+- Unique items: 49986
+- Unique categories: 961
+- Synthetic homepage impressions: 127300
 
 ## Event-Type Counts
 
-- view: 17385
-- add_to_cart: 909
-- transaction: 290
+- view: 165147
+- add_to_cart: 8019
+- transaction: 2604
 
 ## Session Length Distribution
 
@@ -49,47 +49,47 @@ Retailrocket is a public e-commerce behavioural dataset distributed through Kagg
 - p25: 2.0
 - median: 2.0
 - p75: 4.0
-- max: 82.0
+- max: 248.0
 
 ## Conversion Rates
 
-- Session conversion rate: 0.0396
-- Session add-to-cart rate: 0.1080
+- Session conversion rate: 0.0347
+- Session add-to-cart rate: 0.1030
 
 ## Train/Validation/Test Sizes
 
-- train: 3500
-- validation: 750
-- test: 750
+- train: 35000
+- validation: 7500
+- test: 7500
 
 ## Missing-Value Summary
 
 ```json
 {
   "events": {
-    "transaction_id": 18294,
-    "category_id": 3990
+    "transaction_id": 173166,
+    "category_id": 37221
   },
   "products": {
-    "category_id": 498,
-    "parent_category_id": 498,
-    "available": 498,
-    "price": 10278
+    "category_id": 3732,
+    "parent_category_id": 3732,
+    "available": 3732,
+    "price": 49986
   },
   "sessions": {
-    "first_category_id": 1117,
-    "last_category_id": 1073
+    "first_category_id": 10798,
+    "last_category_id": 10482
   },
   "labels": {
-    "next_category_id": 267
+    "next_category_id": 2450
   },
   "decision_features": {
-    "first_category_id": 145,
-    "last_category_id": 145,
-    "most_frequent_category_id": 145
+    "first_category_id": 1436,
+    "last_category_id": 1436,
+    "most_frequent_category_id": 1436
   },
   "homepage_impressions": {
-    "content_category_id": 1283
+    "content_category_id": 12730
   },
   "splits": {}
 }
