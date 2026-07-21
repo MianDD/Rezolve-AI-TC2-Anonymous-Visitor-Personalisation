@@ -85,8 +85,11 @@ Development sampling is deterministic and preserves complete sessions:
   --raw-dir data/raw/retailrocket ^
   --output-dir data/processed ^
   --max-sessions 5000 ^
+  --sample-strategy evenly_spaced ^
   --seed 42
 ```
+
+`evenly_spaced` is the default sampling strategy for `--max-sessions`. It selects complete sessions across the full chronological range, which gives a more representative development sample than taking only the earliest sessions.
 
 ## Outputs
 

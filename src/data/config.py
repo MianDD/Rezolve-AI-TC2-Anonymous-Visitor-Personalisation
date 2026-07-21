@@ -20,6 +20,7 @@ EXPECTED_RETAILROCKET_FILES = (
 )
 
 VALID_SOURCES = {"retailrocket", "fixture"}
+VALID_SAMPLE_STRATEGIES = {"first", "evenly_spaced"}
 REAL_SOURCE_TYPE = "retailrocket"
 FIXTURE_SOURCE_TYPE = "fixture_retailrocket"
 SYNTHETIC_HOMEPAGE_SOURCE_TYPE = "synthetic_homepage_impression"
@@ -79,6 +80,7 @@ class DatasetConfig:
     seed: int = DEFAULT_RANDOM_SEED
     max_events: int | None = None
     max_sessions: int | None = None
+    sample_strategy: str = "evenly_spaced"
 
     @property
     def source_type(self) -> str:

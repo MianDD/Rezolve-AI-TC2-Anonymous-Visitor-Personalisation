@@ -96,6 +96,7 @@ def sample_complete_sessions(
     events: pd.DataFrame,
     max_sessions: int | None = None,
     max_events: int | None = None,
+    strategy: str = "evenly_spaced",
 ) -> pd.DataFrame:
     """Deterministically sample whole sessions without cutting a session midway."""
     if events.empty or (max_sessions is None and max_events is None):
@@ -108,9 +109,38 @@ def sample_complete_sessions(
         .sort_values(["session_start", "session_id"], kind="mergesort")
     )
 
+    if strategy not in {"first", "evenly_spaced"}:
+        raise ValueError("strategy must be one of: first, evenly_spaced")
+
+    if strategy == "evenly_spaced" and max_sessions is not None:
+        n_sessions = len(session_order)
+        if max_sessions >= n_sessions:
+            candidate_order = session_order
+        elif max_sessions <= 1:
+            candidate_order = session_order.head(max_sessions)
+        else:
+            raw_positions = [
+                round(index * (n_sessions - 1) / (max_sessions - 1))
+                for index in range(max_sessions)
+            ]
+            positions: list[int] = []
+            used = set()
+            for position in raw_positions:
+                position = int(position)
+                while position in used and position + 1 < n_sessions:
+                    position += 1
+                if position not in used:
+                    positions.append(position)
+                    used.add(position)
+            candidate_order = session_order.iloc[positions].sort_values(
+                ["session_start", "session_id"], kind="mergesort"
+            )
+    else:
+        candidate_order = session_order
+
     selected: list[str] = []
     total_events = 0
-    for row in session_order.itertuples(index=False):
+    for row in candidate_order.itertuples(index=False):
         if max_sessions is not None and len(selected) >= max_sessions:
             break
         if max_events is not None and selected and total_events + row.number_of_events > max_events:

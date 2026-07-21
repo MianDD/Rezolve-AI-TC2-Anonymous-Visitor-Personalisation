@@ -14,11 +14,12 @@ import pandas as pd
 from src.data.build_labels import build_labels_and_decision_features
 from src.data.build_products import build_products
 from src.data.build_sessions import build_sessions
-from src.data.config import DatasetConfig, VALID_SOURCES
+from src.data.config import DatasetConfig, VALID_SAMPLE_STRATEGIES, VALID_SOURCES
 from src.data.load_retailrocket import (
-    RetailrocketRawData,
     attach_event_categories,
-    load_raw_retailrocket,
+    load_category_tree,
+    load_item_properties_for_items,
+    load_raw_events,
     normalise_category_tree,
     normalise_events,
     normalise_item_properties,
@@ -54,22 +55,42 @@ def _write_parquet(table: pd.DataFrame, path: Path) -> None:
     table.to_parquet(path, index=False)
 
 
-def _load_raw(config: DatasetConfig) -> tuple[RetailrocketRawData, int]:
-    raw = load_raw_retailrocket(config.raw_dir)
-    raw_event_count = len(raw.events)
-    events = normalise_events(raw.events, source_type=config.source_type)
-    item_properties = normalise_item_properties(raw.item_properties)
-    category_tree = normalise_category_tree(raw.category_tree)
-    events = attach_event_categories(events, item_properties)
-    return (
-        RetailrocketRawData(
-            events=events,
-            item_properties=item_properties,
-            category_tree=category_tree,
-            missing_metadata_files=raw.missing_metadata_files,
-        ),
-        raw_event_count,
+def _load_and_sessionize_events(config: DatasetConfig) -> tuple[pd.DataFrame, int]:
+    """Load events, create sessions, and apply deterministic complete-session sampling."""
+    raw_events = load_raw_events(config.raw_dir)
+    raw_event_count = len(raw_events)
+    events = normalise_events(raw_events, source_type=config.source_type)
+    sessionized = sessionize_events(
+        events,
+        gap_minutes=config.session_gap_minutes,
+        min_session_events=config.min_session_events,
     )
+    sampled = sample_complete_sessions(
+        sessionized,
+        max_sessions=config.max_sessions,
+        max_events=config.max_events,
+        strategy=config.sample_strategy,
+    )
+    return sampled, raw_event_count
+
+
+def _load_metadata_for_events(
+    config: DatasetConfig, events: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame, list[str]]:
+    """Load item metadata for the event items retained in the dataset."""
+    item_ids = events["item_id"].dropna().unique()
+    raw_properties, missing_properties = load_item_properties_for_items(
+        config.raw_dir,
+        item_ids=item_ids,
+    )
+    category_tree_path = config.raw_dir / "category_tree.csv"
+    missing_metadata = list(missing_properties)
+    if not category_tree_path.exists():
+        missing_metadata.append("category_tree.csv")
+
+    item_properties = normalise_item_properties(raw_properties)
+    category_tree = normalise_category_tree(load_category_tree(config.raw_dir))
+    return item_properties, category_tree, missing_metadata
 
 
 def _session_length_distribution(sessions: pd.DataFrame) -> dict[str, float]:
@@ -214,28 +235,22 @@ def prepare_dataset(config: DatasetConfig) -> dict[str, Any]:
     if config.source not in VALID_SOURCES:
         raise ValueError(f"Unsupported source {config.source!r}. Choose from {VALID_SOURCES}.")
 
-    raw, raw_event_count = _load_raw(config)
-    events = sessionize_events(
-        raw.events,
-        gap_minutes=config.session_gap_minutes,
-        min_session_events=config.min_session_events,
-    )
-    events = sample_complete_sessions(
-        events,
-        max_sessions=config.max_sessions,
-        max_events=config.max_events,
-    )
+    events, raw_event_count = _load_and_sessionize_events(config)
     if events.empty:
         raise ValueError(
             "No sessions were retained. Try lowering --min-session-events or checking raw data."
         )
 
+    item_properties, category_tree, missing_metadata_files = _load_metadata_for_events(
+        config, events
+    )
+    events = attach_event_categories(events, item_properties)
     sessions = build_sessions(events)
     splits = assign_time_splits(sessions)
     products = build_products(
         events,
-        raw.item_properties,
-        raw.category_tree,
+        item_properties,
+        category_tree,
         source_type=config.source_type,
     )
     labels, decision_features = build_labels_and_decision_features(
@@ -270,7 +285,7 @@ def prepare_dataset(config: DatasetConfig) -> dict[str, Any]:
     manifest = {
         "config": config.to_dict(),
         "raw_event_count": raw_event_count,
-        "missing_metadata_files": raw.missing_metadata_files,
+        "missing_metadata_files": missing_metadata_files,
         "output_hashes": output_hashes,
     }
     manifest_path = config.output_dir / "dataset_manifest.json"
@@ -281,7 +296,7 @@ def prepare_dataset(config: DatasetConfig) -> dict[str, Any]:
         config.report_path,
         config,
         raw_event_count,
-        raw.missing_metadata_files,
+        missing_metadata_files,
         tables,
         validation,
     )
@@ -302,6 +317,12 @@ def prepare_dataset(config: DatasetConfig) -> dict[str, Any]:
 def parse_args() -> DatasetConfig:
     parser = argparse.ArgumentParser(description="Prepare TC2 reproducible datasets.")
     parser.add_argument("--source", default="retailrocket", choices=sorted(VALID_SOURCES))
+    parser.add_argument(
+        "--sample-strategy",
+        default="evenly_spaced",
+        choices=sorted(VALID_SAMPLE_STRATEGIES),
+        help="How to choose complete sessions when --max-sessions is set.",
+    )
     parser.add_argument("--raw-dir", default=None)
     parser.add_argument("--output-dir", default="data/processed")
     parser.add_argument("--report-path", default="reports/dataset_summary.md")
@@ -333,6 +354,7 @@ def parse_args() -> DatasetConfig:
         seed=args.seed,
         max_events=args.max_events,
         max_sessions=args.max_sessions,
+        sample_strategy=args.sample_strategy,
     )
 
 

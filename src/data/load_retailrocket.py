@@ -63,6 +63,64 @@ def load_raw_retailrocket(raw_dir: str | Path) -> RetailrocketRawData:
     return RetailrocketRawData(events, item_properties, category_tree, missing_metadata)
 
 
+def load_raw_events(raw_dir: str | Path) -> pd.DataFrame:
+    """Load only Retailrocket events.csv."""
+    directory = Path(raw_dir)
+    events_path = directory / "events.csv"
+    if not events_path.exists():
+        raise FileNotFoundError(
+            f"Missing Retailrocket events file: {events_path}. "
+            "Download from Kaggle or use --source fixture for local tests."
+        )
+    return pd.read_csv(events_path)
+
+
+def load_category_tree(raw_dir: str | Path) -> pd.DataFrame:
+    """Load category_tree.csv when available."""
+    return _read_csv_if_exists(Path(raw_dir) / "category_tree.csv")
+
+
+def load_item_properties_for_items(
+    raw_dir: str | Path,
+    item_ids: pd.Series | list[int] | set[int] | None = None,
+    chunksize: int = 500_000,
+) -> tuple[pd.DataFrame, list[str]]:
+    """Load item property rows, optionally filtering to relevant item IDs.
+
+    The full Retailrocket item property files are large. For development
+    samples, filtering while reading chunks keeps the pipeline fast without
+    changing output schemas.
+    """
+    directory = Path(raw_dir)
+    paths = [
+        directory / "item_properties_part1.csv",
+        directory / "item_properties_part2.csv",
+    ]
+    missing = [path.name for path in paths if not path.exists()]
+    existing_paths = [path for path in paths if path.exists()]
+    if not existing_paths:
+        return pd.DataFrame(columns=["timestamp", "itemid", "property", "value"]), missing
+
+    item_filter: set[int] | None = None
+    if item_ids is not None:
+        item_filter = {
+            int(item_id)
+            for item_id in pd.Series(list(item_ids)).dropna().astype("int64").tolist()
+        }
+
+    pieces: list[pd.DataFrame] = []
+    for path in existing_paths:
+        for chunk in pd.read_csv(path, chunksize=chunksize):
+            if item_filter is not None:
+                chunk = chunk[chunk["itemid"].isin(item_filter)]
+            if not chunk.empty:
+                pieces.append(chunk)
+
+    if not pieces:
+        return pd.DataFrame(columns=["timestamp", "itemid", "property", "value"]), missing
+    return pd.concat(pieces, ignore_index=True), missing
+
+
 def normalise_event_types(events: pd.DataFrame) -> pd.Series:
     normalised = events["event"].astype(str).str.strip().str.lower().map(EVENT_TYPE_MAP)
     return normalised
@@ -169,13 +227,14 @@ def attach_event_categories(
     This avoids using future item-category changes for historical events.
     """
     output = events.copy()
+    output["_input_order"] = range(len(output))
     category_history = item_properties[
         item_properties["property_lower"].eq("categoryid")
     ].copy()
 
     if category_history.empty:
         output["category_id"] = pd.Series(pd.NA, index=output.index, dtype="Int64")
-        return output
+        return output.drop(columns=["_input_order"])
 
     category_history["category_id"] = pd.to_numeric(
         category_history["value"], errors="coerce"
@@ -205,8 +264,10 @@ def attach_event_categories(
                 item_copy["category_id"] = pd.NA
             else:
                 item_copy = pd.merge_asof(
-                    item_events.sort_values("timestamp"),
-                    item_history.sort_values("timestamp"),
+                    item_events.drop(columns=["category_id"], errors="ignore").sort_values(
+                        "timestamp"
+                    ),
+                    item_history.drop(columns=["item_id"]).sort_values("timestamp"),
                     on="timestamp",
                     direction="backward",
                 )
@@ -217,7 +278,10 @@ def attach_event_categories(
     merged["category_id"] = pd.to_numeric(
         merged["category_id"], errors="coerce"
     ).astype("Int64")
-    return merged.sort_values(["visitorid", "timestamp"], kind="mergesort")
+    merged = merged.sort_values("_input_order", kind="mergesort").drop(
+        columns=["_input_order"]
+    )
+    return merged.reset_index(drop=True)
 
 
 def load_and_prepare_raw(raw_dir: str | Path, source_type: str) -> RetailrocketRawData:

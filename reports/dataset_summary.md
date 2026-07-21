@@ -2,11 +2,11 @@
 
 ## Source Dataset
 
-- Source: fixture
-- Source type in event tables: fixture_retailrocket
-- Retailrocket files expected in: `data\fixtures\retailrocket`
+- Source: retailrocket
+- Source type in event tables: retailrocket
+- Retailrocket files expected in: `data\raw\retailrocket`
 - Missing metadata files during this run: none
-- Processing date: 2026-07-21T08:36:27.796573+00:00
+- Processing date: 2026-07-21T09:07:04.412966+00:00
 
 Retailrocket is a public e-commerce behavioural dataset distributed through Kaggle. Follow Kaggle's dataset page for attribution and licence requirements before using the full dataset in shared or commercial work.
 
@@ -14,8 +14,8 @@ Retailrocket is a public e-commerce behavioural dataset distributed through Kagg
 
 ```json
 {
-  "source": "fixture",
-  "raw_dir": "data\\fixtures\\retailrocket",
+  "source": "retailrocket",
+  "raw_dir": "data\\raw\\retailrocket",
   "output_dir": "data\\processed",
   "report_path": "reports\\dataset_summary.md",
   "session_gap_minutes": 30,
@@ -23,56 +23,74 @@ Retailrocket is a public e-commerce behavioural dataset distributed through Kagg
   "decision_event_index": 3,
   "seed": 42,
   "max_events": null,
-  "max_sessions": null
+  "max_sessions": 5000,
+  "sample_strategy": "evenly_spaced"
 }
 ```
 
 ## Volumes
 
-- Raw event rows loaded: 48
-- Retained event rows: 48
-- Retained sessions: 12
-- Unique items: 8
-- Unique categories: 5
-- Synthetic homepage impressions: 120
+- Raw event rows loaded: 2756101
+- Retained event rows: 18584
+- Retained sessions: 5000
+- Unique items: 10278
+- Unique categories: 692
+- Synthetic homepage impressions: 12830
 
 ## Event-Type Counts
 
-- view: 38
-- add_to_cart: 7
-- transaction: 3
+- view: 17385
+- add_to_cart: 909
+- transaction: 290
 
 ## Session Length Distribution
 
-- min: 4.0
-- p25: 4.0
-- median: 4.0
+- min: 2.0
+- p25: 2.0
+- median: 2.0
 - p75: 4.0
-- max: 4.0
+- max: 82.0
 
 ## Conversion Rates
 
-- Session conversion rate: 0.2500
-- Session add-to-cart rate: 0.5000
+- Session conversion rate: 0.0396
+- Session add-to-cart rate: 0.1080
 
 ## Train/Validation/Test Sizes
 
-- train: 8
-- validation: 2
-- test: 2
+- train: 3500
+- validation: 750
+- test: 750
 
 ## Missing-Value Summary
 
 ```json
 {
   "events": {
-    "transaction_id": 45
+    "transaction_id": 18294,
+    "category_id": 3990
   },
-  "products": {},
-  "sessions": {},
-  "labels": {},
-  "decision_features": {},
-  "homepage_impressions": {},
+  "products": {
+    "category_id": 498,
+    "parent_category_id": 498,
+    "available": 498,
+    "price": 10278
+  },
+  "sessions": {
+    "first_category_id": 1117,
+    "last_category_id": 1073
+  },
+  "labels": {
+    "next_category_id": 267
+  },
+  "decision_features": {
+    "first_category_id": 145,
+    "last_category_id": 145,
+    "most_frequent_category_id": 145
+  },
+  "homepage_impressions": {
+    "content_category_id": 1283
+  },
   "splits": {}
 }
 ```
