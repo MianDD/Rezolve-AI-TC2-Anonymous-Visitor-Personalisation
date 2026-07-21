@@ -91,6 +91,19 @@ Development sampling is deterministic and preserves complete sessions:
 
 `evenly_spaced` is the default sampling strategy for `--max-sessions`. It selects complete sessions across the full chronological range, which gives a more representative development sample than taking only the earliest sessions.
 
+## Baseline Evaluation
+
+After preparing and validating `data/processed/`, run simple train-fitted baselines:
+
+```bash
+.venv\Scripts\python.exe -m src.baseline_evaluation ^
+  --data-dir data/processed ^
+  --output-dir outputs/tables ^
+  --report-path reports/baseline_evaluation.md
+```
+
+This evaluates global popularity, category popularity, recent-item/category rules, and simple prefix rules for add-to-cart and purchase targets. These are deliberately simple baselines, not complex recommendation models.
+
 ## Outputs
 
 Processed outputs are written as Parquet files under `data/processed/`, which is ignored by Git:
