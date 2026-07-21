@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TC2 Anonymous Homepage Personalisation Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">TC2 Anonymous Visitor Personalisation</p>
+        <h1>Homepage module decisions from early-session behaviour</h1>
+      </div>
+      <div class="summary" aria-label="Baseline summary">
+        <div>
+          <span>Next category</span>
+          <strong id="metric-category">-</strong>
+        </div>
+        <div>
+          <span>Next item</span>
+          <strong id="metric-item">-</strong>
+        </div>
+        <div>
+          <span>Purchase F1</span>
+          <strong id="metric-purchase">-</strong>
+        </div>
+      </div>
+    </header>
+
+    <section class="workspace" aria-label="Demo workspace">
+      <aside class="session-list" aria-label="Anonymous sessions">
+        <div class="section-heading">
+          <h2>Sessions</h2>
+          <span id="session-count"></span>
+        </div>
+        <div id="session-buttons" class="session-buttons"></div>
+      </aside>
+
+      <section class="decision-panel" aria-label="Decision context">
+        <div class="section-heading">
+          <h2 id="selected-session">Session</h2>
+          <span id="selected-split"></span>
+        </div>
+        <div class="context-strip">
+          <div>
+            <span>Decision event</span>
+            <strong id="decision-index">-</strong>
+          </div>
+          <div>
+            <span>Later stage</span>
+            <strong id="conversion-stage">-</strong>
+          </div>
+          <div>
+            <span>Proxy label</span>
+            <strong id="intent-proxy">-</strong>
+          </div>
+        </div>
+        <ol id="prefix-events" class="event-timeline" aria-label="Early session events"></ol>
+      </section>
+
+      <section class="homepage-panel" aria-label="Homepage modules">
+        <div class="section-heading">
+          <h2>Homepage</h2>
+          <div class="strategy-toggle" role="group" aria-label="Strategy">
+            <button type="button" class="toggle-button is-active" data-strategy="control">Control</button>
+            <button type="button" class="toggle-button" data-strategy="rule_based">Rule based</button>
+          </div>
+        </div>
+        <div id="module-grid" class="module-grid"></div>
+      </section>
+    </section>
+
+    <section class="outcome-band" aria-label="Observed outcome after decision">
+      <div>
+        <span>Next observed event</span>
+        <strong id="next-event">-</strong>
+      </div>
+      <div>
+        <span>Next item</span>
+        <strong id="next-item">-</strong>
+      </div>
+      <div>
+        <span>Next category</span>
+        <strong id="next-category">-</strong>
+      </div>
+      <div>
+        <span>Synthetic match</span>
+        <strong id="strategy-match">-</strong>
+      </div>
+    </section>
+
+    <p class="limitation">
+      Homepage impressions and clicks shown here are simulated for prototype evaluation. They are not observed CTR and do not establish causal uplift.
+    </p>
+  </main>
+
+  <script src="demo_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

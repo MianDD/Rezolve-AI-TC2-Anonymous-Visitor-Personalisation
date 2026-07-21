@@ -104,6 +104,20 @@ After preparing and validating `data/processed/`, run simple train-fitted baseli
 
 This evaluates global popularity, category popularity, recent-item/category rules, and simple prefix rules for add-to-cart and purchase targets. These are deliberately simple baselines, not complex recommendation models.
 
+## Interactive Demo
+
+Build the static demo dataset from the prepared Parquet files and baseline tables:
+
+```bash
+.venv\Scripts\python.exe -m src.demo.build_demo_data ^
+  --data-dir data/processed ^
+  --baseline-dir outputs/tables ^
+  --output demo/demo_data.js ^
+  --max-sessions 12
+```
+
+Open `demo/index.html` in a browser. The demo compares control and rule-based homepage modules for representative anonymous sessions. Displayed homepage clicks are synthetic match signals only; they are not observed CTR.
+
 ## Outputs
 
 Processed outputs are written as Parquet files under `data/processed/`, which is ignored by Git:
