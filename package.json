@@ -1,8 +1,5 @@
 {
   "scripts": {
-    "build": "vite build demo --outDir ../dist --emptyOutDir"
-  },
-  "devDependencies": {
-    "vite": "^5.4.11"
+    "build": "node scripts/build-site.mjs"
   }
 }
