@@ -4,3 +4,6 @@ scikit-learn
 matplotlib
 tqdm
 jupyter
+pyarrow
+pytest
+kaggle
